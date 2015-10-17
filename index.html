@@ -23,7 +23,7 @@
         }
         #lppanel {
           position: absolute;
-          height: 80px;
+          height: 120px;
           font-family: arial;
           top: 10px;
           margin: 5px;
@@ -37,117 +37,7 @@
         }
     </style>
     <script src="http://js.arcgis.com/3.14/"></script>
-    <script>
-      var map, csv, layer;
-      var assaultLayer, autoLayer, burglaryLayer, theftLayer, murderLayer, rapeLayer, robberyLayer;
-
-      require([
-        "dojo/query",
-        "esri/map",
-        "esri/layers/CSVLayer",
-        "esri/Color",
-        "esri/symbols/SimpleMarkerSymbol",
-        "esri/renderers/SimpleRenderer",
-        "esri/InfoTemplate",
-        "esri/urlUtils",
-        "dojo/domReady!"
-      ], function(
-        query, Map, CSVLayer, Color, SimpleMarkerSymbol, SimpleRenderer, InfoTemplate, urlUtils
-      )
-        {
-        map = new Map("map", {
-          basemap: "gray",
-          center: [ -95.4, 29.8 ],
-          zoom: 10
-        });
-
-map.on("load", function() {
-  query("#lplist").on("change", function(e) {
-    var value = e.currentTarget.value;
-
-    // Remove previously added layer
-    if (layer) {
-    //  map.removeLayer(layer);
-      layer = null;
-    }
-    var currentColor;
-    var orangeRed = new Color([238, 69, 0, 0.5]); // hex is #ff4500
-    var myRed = new Color([255,0,0,0.5]);
-    var myGreen = new Color([0,255,0,0.5]);
-    var myBlue = new Color([0,0,255,0.5]);
-    var myPurple = new Color([255,0,255,0.5]);
-    var myTurquoise = new Color([0,255,255,0.5]);
-    var myOrange = new Color([255,255,0,0.5]);
-
-    switch (value) {
-      case "assault":
-        layer = new CSVLayer("assault.csv");
-        assaultLayer = layer;
-        currentColor = myRed;
-        break;
-      case "auto":
-        layer = new CSVLayer("auto.csv");
-        autoLayer = layer;
-        currentColor = myBlue;
-        break;
-      case "burglary":
-          layer = new CSVLayer("burglary.csv");
-          burglaryLayer = layer;
-          currentColor = myGreen;
-          break;
-      case "murder":
-        layer = new CSVLayer("murder.csv");
-        murderLayer = layer;
-        currentColor = myPurple;
-        break;
-      case "rape":
-        layer = new CSVLayer("rape.csv");
-        rapeLayer = layer;
-        currentColor = myTurquoise;
-        break;
-      case "robbery":
-        layer = new CSVLayer("robbery.csv");
-        robberyLayer = layer;
-        currentColor = myOrange;
-        break;
-      case "theft":
-        layer = new CSVLayer("theft.csv");
-        theftLayer = layer;
-        currentColor = orangeRed;
-        break;
-
-
-    }
-
-    if (layer) {
-      var orangeRed = new Color([238, 69, 0, 0.5]); // hex is #ff4500
-      var myRed = new Color([255,0,0,0.5]);
-      var myGreen = new Color([0,255,0,0.5]);
-      var myBlue = new Color([0,0,255,0.5]);
-      var myPurple = new Color([255,0,255,0.5]);
-      var myTurquoise = new Color([0,255,255,0.5]);
-      var myOrange = new Color([255,255,0,0.5]);
-
-
-      //var currentColor = myRed;
-      var marker = new SimpleMarkerSymbol("solid", 15, null, currentColor);
-      var renderer = new SimpleRenderer(marker);
-      layer.setRenderer(renderer);
-      var template = new InfoTemplate("${type}", "${place}");
-      layer.setInfoTemplate(template);
-      map.addLayer(layer);
-
-      // layer.on("update-end", function() {
-      //   map.centerAt(graphicsUtils.graphicsExtent(array.filter(this.graphics, function(graphic) {
-      //     return graphic.geometry;
-      //   })).getCenter());
-      // });
-    }
-  });
-});
-
-      });
-    </script>
+    <script type="text/javascript" src="layermgr.js"></script>
   </head>
 
   <body>
@@ -170,6 +60,10 @@ map.on("load", function() {
                 <option value="robbery">Robbery</option>
                 <option value="theft">Theft</option>
               </select>
+            </div>
+            <div style="padding:10px;">
+              <label><input type='checkbox' id="cbLayer" onclick='handleClick(this);'>Overlay layers</label>
+              <!-- <label><input type='checkbox' value="AutoTheft" id="cbAutoTheft" onclick='handleClick(this);'>Auto Theft</label> -->
             </div>
           </td>
         </tr>
