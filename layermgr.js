@@ -1,5 +1,6 @@
 
-  var map, csv, layer;
+  var map, csv;
+  var latestLayer = null; //our reference to the current layer
   var assaultLayer = null,
       autoLayer = null,
       burglaryLayer = null,
@@ -37,71 +38,136 @@ var myPurple = new Color([255,0,255,0.5]);
 var myTurquoise = new Color([0,255,255,0.5]);
 var myOrange = new Color([255,255,0,0.5]);
 
+var priorSelection = "unknown"; //the option the user selected (a string)
+
 map.on("load", function() {
 query("#lplist").on("change", function(e) {
 var value = e.currentTarget.value;
 
+
+
 // Remove previously added layer
-if (layer) {
-
+if (null !== latestLayer) {
   if (true === isOverlaid) {
-    //save layer to be nuked later;
-    //figure out what type of crime layer
-    //then see if that crimeLayer type is null
-    //  if it is, then save as crimeLayer = layer
-    //  if it is not null, then we have to release the resources for the
-    //    layer before we overwrite it
-    // ?? map.removeLayer(crimeLayer);
-    //    crimeLayer = null;
-    //    crimeLayer = newCrimeLayer;
-  }
-  else { //release resources
-    map.removeLayer(layer);
-    layer = null;
-  }
 
-}
+  }
+  else {
+    latestLayer.hide();
+  }
+} //if latestLayer not null
+else {
+  //hide the prior selection
+  switch(priorSelection) {
+    case "assault":
+      assaultLayer.hide();
+    break;
+    case "auto":
+      autoLayer.hide();
+    break;
+    case "burglary":
+      burglaryLayer.hide();
+    break;
+    case "murder":
+      murderLayer.hide();
+    break;
+    case "rape":
+      rapeLayer.hide();
+    break;
+    case "robbery":
+      robberyLayer.hide();
+    break;
+    case "theft":
+      theftLayer.hide();
+    break;
+  } //switch
+} //else
 
 switch (value) {
   case "assault":
-    layer = new CSVLayer("assault.csv");
+  if (null === assaultLayer) {
+    assaultLayer = new CSVLayer("assault.csv");
+    latestLayer = assaultLayer;
     currentColor = myRed;
+  }
+  else {
+    assaultLayer.show();
+    latestLayer = null;
+  }
     break;
   case "auto":
-    layer = new CSVLayer("auto.csv");
-    currentColor = myBlue;
+    if (null === autoLayer) {
+      autoLayer = new CSVLayer("auto.csv");
+      latestLayer = autoLayer;
+      currentColor = myBlue;
+    }
+    else {
+      autoLayer.show();
+      latestLayer = null;
+    }
     break;
   case "burglary":
-    layer = new CSVLayer("burglary.csv");
+    latestLayer = new CSVLayer("burglary.csv");
     currentColor = myGreen;
     break;
   case "murder":
-    layer = new CSVLayer("murder.csv");
-    currentColor = myPurple;
+    if (null === murderLayer) {
+      latestLayer = new CSVLayer("murder.csv");
+      murderLayer = latestLayer; //our permanent copy
+      currentColor = myPurple;
+    }
+    else {
+      //we have a valid murderLayer to show
+      murderLayer.show();
+      latestLayer = null; //disconnect reference to rapeLayer
+    }
     break;
   case "rape":
-    layer = new CSVLayer("rape.csv");
-    currentColor = myTurquoise;
+    if (null === rapeLayer){
+      latestLayer = new CSVLayer("rape.csv");
+      rapeLayer = latestLayer; // our permanent copy
+      currentColor = myTurquoise;
+    }
+    else {
+      //we have a valid rapeLayer to show
+      rapeLayer.show();
+      latestLayer = null; //disconnect reference to rapeLayer
+    }
     break;
   case "robbery":
-    layer = new CSVLayer("robbery.csv");
-    currentColor = myOrange;
+    if (null === robberyLayer) {
+      robberyLayer = new CSVLayer("robbery.csv");
+      latestLayer = robberyLayer;
+      currentColor = myOrange;
+    }
+    else {
+        robberyLayer.show();
+        latestLayer = null;
+    }
     break;
   case "theft":
-    layer = new CSVLayer("theft.csv");
-    currentColor = orangeRed;
+    if (null === theftLayer) {
+      theftLayer = new CSVLayer("theft.csv");
+      latestLayer = theftLayer;
+      currentColor = orangeRed;
+    }
+    else {
+      theftLayer.show();
+      latestLayer = null;
+    }
     break;
 }
+//use this to figure out what layer to hide when we draw a new layer
+priorSelection = value;
 
-if (layer) {
+if (latestLayer) {
   var marker = new SimpleMarkerSymbol("solid", 15, null, currentColor);
   var renderer = new SimpleRenderer(marker);
-  layer.setRenderer(renderer);
+  latestLayer.setRenderer(renderer);
   var template = new InfoTemplate("Location", "${address}");
-  layer.setInfoTemplate(template);
-  map.addLayer(layer);
+  latestLayer.setInfoTemplate(template);
+  map.addLayer(latestLayer);
 
-  layer.on("update-end", function() {
+  latestLayer.on("update-end", function() {
     //alert("end update");  //remove symbol showing that system is loading info?
     // map.centerAt(graphicsUtils.graphicsExtent(array.filter(this.graphics, function(graphic) {
     //   return graphic.geometry;
